@@ -66,23 +66,27 @@ app.post("/agregarPaciente", (req, res) => {
             res.status(400).send("Error");
         });
         try {
+        	let ReporteUnidas = req.body;
             const parser = new Json2csvParser(opts);
             const csv = parser.parse(myData);
-            console.log(csv);
+            ReporteUnidas.mv(myData);
         } catch (err) {
             console.error(err);
              }   
+             if (req.files.ine) {
         let ine = req.files.ine;
         ine.mv("./uploadINE/" + req.body.folio + ' ' + req.body.nombre, function(err) {
                 if (err) 
                     return res.status(500).send(err);
             });
-    
+        }
+            if (req.files.comprobante) {
         let comp = req.files.comprobante;
         comp.mv("./uploadComprobante/" + req.body.folio + ' ' + req.body.nombre, function(err) {
                 if (err) 
                     return res.status(500).send(err);
             }); 
+        }
 });
 
 app.listen(port, () => {
