@@ -4,6 +4,7 @@ var app = express();
 var port = 3000;
 var bodyParser = require('body-parser');
 var path = require('path');
+var fs = require('fs');
 app.use(upload())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -12,7 +13,7 @@ var mongoose = require("mongoose");
 const Json2csvParser = require('json2csv').Parser;
 //Connect to mongodb
 mongoose.Promise = global.Promise;
-mongoose.connect("mongodb://localhost:27017/unidasPaciente");
+mongoose.connect("mongodb://localhost:27017/unidasPacienteCopia");
 mongoose.connection.once('open', function(){
     console.log('Connection succesfull!');
     }).on('error',function(error){
@@ -55,7 +56,6 @@ var Paciente = mongoose.model("Paciente", pacientes);
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/public/index.html");
 });
-
 app.post("/agregarPaciente", (req, res) => {
     var myData = new Paciente(req.body);
     myData.save()
@@ -66,13 +66,14 @@ app.post("/agregarPaciente", (req, res) => {
             res.status(400).send("Error");
         });
         try {
-        	let ReporteUnidas = req.body;
-            const parser = new Json2csvParser(opts);
-            const csv = parser.parse(myData);
-            ReporteUnidas.mv(myData);
+            var json2csvParser = new Json2csvParser(opts);
+            const csv = json2csvParser.parse(myData);
+            var path='./public/'+'ReporteUnidasC.csv';
+            fs.appendFileSync(path, csv);
+            console.log(csv);
         } catch (err) {
             console.error(err);
-             }   
+             }
              if (req.files.ine) {
         let ine = req.files.ine;
         ine.mv("./uploadINE/" + req.body.folio + ' ' + req.body.nombre, function(err) {
